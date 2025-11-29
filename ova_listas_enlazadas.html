@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Objeto Virtual de Aprendizaje sobre Listas Enlazadas">
+    <title>OVA - Listas Enlazadas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --text-color: #333;
+            --bg-color: #f4f4f4;
+            --white: #ffffff;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+        }
+
+        /* Skip to content link for accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--secondary-color);
+            color: var(--white);
+            padding: 8px;
+            text-decoration: none;
+            z-index: 100;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+        }
+
+        .menu-toggle:hover,
+        .menu-toggle:focus {
+            background: var(--primary-color);
+            outline: 2px solid var(--white);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--white);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 999;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--secondary-color);
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar nav a {
+            display: block;
+            padding: 0.7rem 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .sidebar nav a:hover,
+        .sidebar nav a:focus {
+            background: var(--secondary-color);
+            color: var(--white);
+            transform: translateX(5px);
+            outline: 2px solid var(--secondary-color);
+        }
+
+        .sidebar nav .submenu {
+            margin-left: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        .sidebar nav .submenu a {
+            font-size: 0.9rem;
+            font-weight: 400;
+            padding: 0.5rem 0.8rem;
+        }
+
+        /* Main Content */
+        main {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            max-width: 1200px;
+        }
+
+        section {
+            background: var(--white);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            border-left: 5px solid var(--secondary-color);
+            padding-left: 1rem;
+        }
+
+        section h3 {
+            color: var(--secondary-color);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        section h4 {
+            color: var(--primary-color);
+            margin-top: 1rem;
+            margin-bottom: 0.7rem;
+            font-size: 1.1rem;
+        }
+
+        .content-image {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Quiz Styles */
+        .quiz-container {
+            margin-top: 2rem;
+        }
+
+        .question {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .question h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            margin: 0.7rem 0;
+        }
+
+        .options input[type="radio"] {
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+
+        .options label {
+            cursor: pointer;
+            padding: 0.5rem;
+            display: inline-block;
+            transition: color 0.3s;
+        }
+
+        .options label:hover {
+            color: var(--secondary-color);
+        }
+
+        .quiz-button {
+            background: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 1rem;
+        }
+
+        .quiz-button:hover,
+        .quiz-button:focus {
+            background: var(--primary-color);
+            outline: 2px solid var(--secondary-color);
+        }
+
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* License Section */
+        .license {
+            background: #e8f4f8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .license strong {
+            color: var(--primary-color);
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 1024px) {
+            :root {
+                --sidebar-width: 250px;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            main {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+                margin-top: 2rem;
+            }
+
+            section {
+                padding: 1.5rem;
+            }
+
+            section h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            header h1 {
+                font-size: 1.3rem;
+            }
+
+            section h2 {
+                font-size: 1.3rem;
+            }
+
+            section h3 {
+                font-size: 1.2rem;
+            }
+
+            .quiz-button {
+                width: 100%;
+            }
+        }
+
+        /* Focus indicators for accessibility */
+        *:focus {
+            outline: 2px solid var(--secondary-color);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <button class="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" onclick="toggleMenu()">
+        ☰ Menú
+    </button>
+
+    <header role="banner">
+        <h1>Listas Enlazadas</h1>
+        <p>Objeto Virtual de Aprendizaje - Estructuras de Datos</p>
+    </header>
+
+    <aside class="sidebar" role="navigation" aria-label="Menú principal de contenidos">
+        <h2>Contenidos</h2>
+        <nav>
+            <ul>
+                <li><a href="#presentacion" tabindex="0">Presentación del OVA</a></li>
+                <li>
+                    <a href="#concepto-basico" tabindex="0">1.1 Concepto Básico</a>
+                    <ul class="submenu">
+                        <li><a href="#definicion" tabindex="0">1.1.1 Definición</a></li>
+                        <li><a href="#caracteristicas" tabindex="0">1.1.2 Características</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#tipos-listas" tabindex="0">1.2 Tipos de Listas</a>
+                    <ul class="submenu">
+                        <li><a href="#simple" tabindex="0">1.2.1 Simple</a></li>
+                        <li><a href="#doble" tabindex="0">1.2.2 Doble</a></li>
+                        <li><a href="#circular" tabindex="0">1.2.3 Circular</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#operaciones" tabindex="0">1.3 Operaciones Básicas</a>
+                    <ul class="submenu">
+                        <li><a href="#insercion" tabindex="0">1.3.1 Inserción</a></li>
+                        <li><a href="#eliminacion" tabindex="0">1.3.2 Eliminación</a></li>
+                        <li><a href="#busqueda" tabindex="0">1.3.3 Búsqueda</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#implementacion" tabindex="0">1.4 Implementación</a>
+                    <ul class="submenu">
+                        <li><a href="#nodo" tabindex="0">1.4.1 Estructura de Nodo</a></li>
+                        <li><a href="#ejemplo" tabindex="0">1.4.2 Ejemplo Práctico</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#aplicaciones" tabindex="0">1.5 Aplicaciones</a>
+                    <ul class="submenu">
+                        <li><a href="#casos-uso" tabindex="0">1.5.1 Casos de Uso</a></li>
+                        <li><a href="#ventajas" tabindex="0">1.5.2 Ventajas y Desventajas</a></li>
+                    </ul>
+                </li>
+                <li><a href="#actividades" tabindex="0">Actividades de Aprendizaje</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main id="main-content" role="main">
+        <section id="presentacion">
+            <h2>Presentación del OVA</h2>
+            <p>Este recurso nos muestra cómo trabajar con los diferentes tipos de listas enlazadas. Fue creado por <strong>Keyler Sneider Arias Calvo</strong>, <strong>Keyner Kaleth Rodríguez Osuna</strong> y <strong>Santiago Corredor Jaramillo</strong>, bajo la metodología <strong>QCHE</strong> del Dr. Raúl E. Rodríguez Ibáñez.</p>
+            
+            <h3>Metodología QCHE</h3>
+            <ul>
+                <li><strong>¿Qué voy a hacer?</strong> - Identificar los conceptos y objetivos de aprendizaje</li>
+                <li><strong>¿Cómo lo voy a hacer?</strong> - Planificar estrategias de estudio y práctica</li>
+                <li><strong>Hacer</strong> - Ejecutar las actividades y ejercicios propuestos</li>
+                <li><strong>Evaluar</strong> - Verificar la comprensión mediante evaluaciones</li>
+            </ul>
+
+            <div class="license">
+                <strong>Licencia:</strong> Este OVA se distribuye bajo licenciamiento <a href="https://creativecommons.org/" target="_blank" rel="noopener noreferrer">Creative Commons</a>, permitiendo su uso educativo con atribución a los autores.
+            </div>
+        </section>
+
+        <section id="concepto-basico">
+            <h2>1.1 Concepto Básico de Listas Enlazadas</h2>
+            <img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&h=400&fit=crop" alt="Concepto de enlaces y conexiones representando listas enlazadas" class="content-image">
+            
+            <h3 id="definicion">1.1.1 Definición</h3>
+            <p>Una lista enlazada es una estructura de datos lineal y dinámica que consiste en una secuencia de elementos llamados <strong>nodos</strong>. Cada nodo contiene dos componentes principales: un campo de datos que almacena la información, y uno o más campos de enlace (punteros o referencias) que conectan con otros nodos de la lista.</p>
+            
+            <p>A diferencia de los arreglos, donde los elementos se almacenan en posiciones contiguas de memoria, en las listas enlazadas los elementos pueden estar dispersos en diferentes ubicaciones de memoria, conectados mediante referencias. Esta característica permite una gestión más flexible de la memoria y facilita operaciones de inserción y eliminación.</p>
+
+            <h3 id="caracteristicas">1.1.2 Características Principales</h3>
+            <p>Las listas enlazadas presentan características distintivas que las diferencian de otras estructuras de datos:</p>
+            
+            <h4>Estructura Dinámica</h4>
+            <p>El tamaño de la lista puede crecer o reducirse durante la ejecución del programa, ya que los nodos se crean y destruyen dinámicamente según sea necesario. No es necesario definir un tamaño fijo al inicio como ocurre con los arreglos estáticos.</p>
+
+            <h4>Acceso Secuencial</h4>
+            <p>Para acceder a un elemento específico, es necesario recorrer la lista desde el inicio hasta encontrar el nodo deseado. No existe acceso directo mediante índices como en los arreglos, lo que hace que el acceso aleatorio sea menos eficiente con una complejidad temporal de O(n).</p>
+
+            <h4>Eficiencia en Inserciones y Eliminaciones</h4>
+            <p>Una vez localizado el punto de inserción o eliminación, estas operaciones son muy eficientes (O(1)) ya que solo requieren modificar los enlaces entre nodos, sin necesidad de desplazar elementos como ocurre en los arreglos.</p>
+
+            <h4>Uso Eficiente de Memoria</h4>
+            <p>No desperdician memoria en espacios no utilizados, ya que cada nodo se crea bajo demanda. Sin embargo, requieren memoria adicional para almacenar los punteros o referencias.</p>
+        </section>
+
+        <section id="tipos-listas">
+            <h2>1.2 Tipos de Listas Enlazadas</h2>
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=400&fit=crop" alt="Representación visual de diferentes conexiones y tipos de estructuras" class="content-image">
+            
+            <h3 id="simple">1.2.1 Lista Enlazada Simple</h3>
+            <p>En una lista enlazada simple, cada nodo contiene un dato y un puntero al siguiente nodo en la secuencia. El último nodo de la lista apunta a NULL, indicando el final de la estructura. Esta es la forma más básica y común de lista enlazada.</p>
+            
+            <p><strong>Estructura del nodo:</strong> Cada nodo tiene dos campos: 'dato' (información almacenada) y 'siguiente' (referencia al próximo nodo).</p>
+            
+            <p><strong>Ventajas:</strong> Simplicidad de implementación, bajo uso de memoria por nodo, y facilidad para realizar operaciones de inserción al inicio de la lista en tiempo constante O(1).</p>
+            
+            <p><strong>Limitación principal:</strong> Solo permite recorrer la lista en una dirección (hacia adelante), lo que dificulta operaciones que requieren acceso a nodos anteriores.</p>
+
+            <h3 id="doble">1.2.2 Lista Doblemente Enlazada</h3>
+            <p>Una lista doblemente enlazada extiende el concepto de la lista simple al incluir dos punteros en cada nodo: uno apunta al siguiente nodo y otro al nodo anterior. Esto permite recorrer la lista en ambas direcciones, proporcionando mayor flexibilidad en las operaciones.</p>
+            
+            <p><strong>Estructura del nodo:</strong> Contiene tres campos: 'anterior' (referencia al nodo previo), 'dato' (información), y 'siguiente' (referencia al nodo posterior).</p>
+            
+            <p><strong>Ventajas:</strong> Navegación bidireccional, eliminación más eficiente de nodos ya que se puede acceder fácilmente al nodo anterior, y mayor facilidad para implementar operaciones complejas como retroceder en la lista.</p>
+            
+            <p><strong>Desventaja:</strong> Requiere más memoria por nodo debido al puntero adicional, y las operaciones de inserción y eliminación son ligeramente más complejas al tener que actualizar dos enlaces en lugar de uno.</p>
+
+            <h3 id="circular">1.2.3 Lista Circular</h3>
+            <p>En una lista circular, el último nodo no apunta a NULL sino que conecta de vuelta al primer nodo, formando un ciclo. Esta estructura puede implementarse tanto con enlaces simples como dobles, creando así listas circulares simples o doblemente enlazadas.</p>
+            
+            <p><strong>Característica distintiva:</strong> No existe un final explícito en la lista; el recorrido puede continuar indefinidamente a menos que se establezca una condición de parada.</p>
+            
+            <p><strong>Aplicaciones:</strong> Son especialmente útiles para implementar buffers circulares, planificación de procesos en sistemas operativos (Round Robin), listas de reproducción que se repiten, y cualquier aplicación que requiera recorrer elementos de forma cíclica.</p>
+            
+            <p><strong>Consideración importante:</strong> Se debe tener cuidado al recorrer la lista para evitar bucles infinitos, estableciendo condiciones claras de parada basadas en el número de nodos visitados o marcadores específicos.</p>
+        </section>
+
+        <section id="operaciones">
+            <h2>1.3 Operaciones Básicas</h2>
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop" alt="Operaciones y procesos de datos" class="content-image">
+            
+            <h3 id="insercion">1.3.1 Inserción de Nodos</h3>
+            <p>La inserción de elementos en una lista enlazada puede realizarse en tres posiciones principales, cada una con sus propias consideraciones:</p>
+            
+            <h4>Inserción al Inicio</h4>
+            <p>Es la operación más eficiente con complejidad O(1). El nuevo nodo se crea, su puntero 'siguiente' apunta al actual primer nodo, y luego se actualiza la cabeza de la lista para que apunte al nuevo nodo. No requiere recorrer la lista.</p>
+            
+            <h4>Inserción al Final</h4>
+            <p>Requiere recorrer toda la lista hasta encontrar el último nodo (O(n)). El puntero del último nodo se actualiza para apuntar al nuevo nodo, cuyo puntero 'siguiente' se establece en NULL. Puede optimizarse manteniendo un puntero al último nodo.</p>
+            
+            <h4>Inserción en Posición Específica</h4>
+            <p>Se debe recorrer la lista hasta la posición deseada (O(n)). El nuevo nodo se inserta ajustando los punteros: el nodo anterior apunta al nuevo nodo, y el nuevo nodo apunta al nodo que estaba en esa posición. Es importante validar que la posición exista.</p>
+
+            <h3 id="eliminacion">1.3.2 Eliminación de Nodos</h3>
+            <p>La eliminación también puede realizarse en diferentes posiciones de la lista:</p>
+            
+            <h4>Eliminación del Primer Nodo</h4>
+            <p>Operación eficiente O(1). Se actualiza la cabeza de la lista para que apunte al segundo nodo, y se libera la memoria del nodo eliminado. Se debe verificar que la lista no esté vacía antes de realizar esta operación.</p>
+            
+            <h4>Eliminación del Último Nodo</h4>
+            <p>Requiere recorrer la lista hasta el penúltimo nodo (O(n)). El puntero de este nodo se establece en NULL, convirtiéndolo en el nuevo último nodo, y se libera la memoria del antiguo último nodo.</p>
+            
+            <h4>Eliminación de Nodo con Valor Específico</h4>
+            <p>Se recorre la lista buscando el nodo con el valor deseado (O(n)). Cuando se encuentra, se ajustan los punteros del nodo anterior para que apunten al nodo siguiente, saltando el nodo a eliminar, y luego se libera su memoria.</p>
+            
+            <p><strong>Consideración crítica:</strong> En todos los casos de eliminación, es fundamental liberar correctamente la memoria del nodo eliminado para evitar fugas de memoria (memory leaks).</p>
+
+            <h3 id="busqueda">1.3.3 Búsqueda de Elementos</h3>
+            <p>La búsqueda en una lista enlazada es inherentemente secuencial con complejidad O(n) en el peor caso:</p>
+            
+            <p><strong>Proceso de búsqueda:</strong> Se comienza desde el nodo inicial y se recorre la lista nodo por nodo, comparando el valor almacenado en cada uno con el valor buscado. El proceso termina cuando se encuentra el valor o se llega al final de la lista (NULL).</p>
+            
+            <p><strong>Variantes de búsqueda:</strong> Puede implementarse para retornar el nodo completo, solo el valor, la posición del elemento, o un booleano indicando si existe. También es común implementar búsquedas que retornen todos los nodos que cumplan cierto criterio.</p>
+            
+            <p><strong>Optimizaciones posibles:</strong> En listas ordenadas, la búsqueda puede terminar anticipadamente si se encuentra un valor mayor al buscado. Para búsquedas frecuentes, considerar el uso de técnicas como mantener nodos de acceso rápido o combinar con otras estructuras de datos.</p>
+        </section>
+
+        <section id="implementacion">
+            <h2>1.4 Implementación Práctica</h2>
+            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=400&fit=crop" alt="Código de programación y desarrollo de software" class="content-image">
+            
+            <h3 id="nodo">1.4.1 Estructura de un Nodo</h3>
+            <p>La implementación básica de un nodo en diferentes lenguajes de programación sigue un patrón similar. A continuación se presenta un ejemplo conceptual:</p>
+            
+            <p><strong>Componentes esenciales:</strong></p>
+            <ul>
+                <li><strong>Dato:</strong> Variable que almacena la información del nodo. Puede ser de cualquier tipo: entero, cadena, objeto personalizado, etc.</li>
+                <li><strong>Siguiente:</strong> Puntero o referencia que apunta al siguiente nodo en la lista. En el último nodo, este campo es NULL o None.</li>
+                <li><strong>Anterior (opcional):</strong> En listas doblemente enlazadas, un puntero adicional al nodo previo.</li>
+            </ul>
+            
+            <p><strong>Ejemplo conceptual en pseudocódigo:</strong></p>
+            <pre style="background: #f8f9fa; padding: 1rem; border-radius: 5px; overflow-x: auto;">
+Estructura Nodo:
+    dato: TipoDato
+    siguiente: Puntero a Nodo
+    
+    Constructor(valor):
+        dato = valor
+        siguiente = NULL
+            </pre>
+
+            <h3 id="ejemplo">1.4.2 Ejemplo Práctico de Operaciones</h3>
+            <p>Consideremos un escenario práctico para comprender mejor las operaciones con listas enlazadas:</p>
+            
+            <h4>Caso de Estudio: Sistema de Gestión de Tareas</h4>
+            <p>Imaginemos una aplicación que gestiona una lista de tareas pendientes. Cada tarea es un nodo con información como descripción, prioridad y fecha límite.</p>
+            
+            <p><strong>Operación 1 - Agregar nueva tarea al inicio:</strong> Cuando llega una tarea urgente, se inserta al principio de la lista para procesarla primero. Esta operación es instantánea (O(1)) y no requiere reorganizar las demás tareas.</p>
+            
+            <p><strong>Operación 2 - Completar y eliminar tarea:</strong> Cuando se completa una tarea, se busca en la lista, se actualiza el enlace del nodo anterior para que apunte al siguiente nodo, y se elimina la tarea completada, liberando la memoria.</p>
+            
+            <p><strong>Operación 3 - Recorrer todas las tareas:</strong> Para mostrar un resumen de todas las tareas pendientes, se recorre la lista desde el inicio hasta el final, accediendo al dato de cada nodo y mostrando su información.</p>
+            
+            <p><strong>Ventaja en este contexto:</strong> La lista enlazada permite agregar y eliminar tareas de forma eficiente sin necesidad de reservar un espacio fijo de memoria como requeriría un arreglo, adaptándose dinámicamente a la cantidad de tareas activas.</p>
+        </section>
+
+        <section id="aplicaciones">
+            <h2>1.5 Aplicaciones de las Listas Enlazadas</h2>
+            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=400&fit=crop" alt="Aplicaciones prácticas y análisis de datos" class="content-image">
+            
+            <h3 id="casos-uso">1.5.1 Casos de Uso Reales</h3>
+            <p>Las listas enlazadas encuentran aplicación en múltiples áreas de la informática y desarrollo de software:</p>
+            
+            <h4>Navegadores Web</h4>
+            <p>Los botones de "atrás" y "adelante" en navegadores suelen implementarse usando listas doblemente enlazadas. Cada página visitada es un nodo, permitiendo navegar eficientemente hacia adelante y atrás en el historial.</p>
+            
+            <h4>Sistemas Operativos</h4>
+            <p>La gestión de procesos en memoria utiliza listas enlazadas para mantener las colas de procesos. Los algoritmos de planificación como Round Robin utilizan listas circulares para asignar tiempo de CPU a diferentes procesos de forma equitativa.</p>
+            
+            <h4>Editores de Texto</h4>
+            <p>Las funciones de deshacer y rehacer (Undo/Redo) se implementan frecuentemente con listas enlazadas, donde cada estado del documento es un nodo, permitiendo navegar entre diferentes versiones del contenido.</p>
+            
+            <h4>Gestión de Memoria Dinámica</h4>
+            <p>Los sistemas de asignación de memoria
